@@ -1,0 +1,26 @@
+import {test,expect} from '@playwright/test';
+import {rooms} from '../../src/data.js';
+test('complete adventure, errors, reload, locks, card export and reset',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.getByRole('button',{name:'Sound On',exact:true}).click();
+ await expect(page.getByRole('button',{name:/Castle gates/})).toBeDisabled();
+ for(const id of ['tower','gallery','library']){
+  const r=rooms.find(r=>r.id===id);await page.getByRole('button',{name:`Enter ${r.short}`,exact:true}).click();
+  if(id==='tower'){for(let i=0;i<2;i++){await page.locator('.answer').nth(0).click();await expect(page.locator('.monster')).toBeVisible();await expect(page.locator('.monster')).toHaveCount(0);}await expect(page.locator('.hint')).toContainText('Boo’s hint');await page.reload();await expect(page.locator('.hint')).toContainText('Boo’s hint');}
+  for(let i=0;i<3;i++){await page.locator('.answer').nth(r.questions[i].answer).click();if(i<2)await expect(page.locator('.question h2')).toHaveText(r.questions[i+1].text);}
+  await expect(page.locator('.key-reveal')).toBeVisible();await page.locator('.key-reveal button').click();
+ }
+ await expect(page.locator('.inventory')).toContainText('3/3');await page.reload();await expect(page.locator('.inventory')).toContainText('3/3');
+ await page.getByRole('button',{name:'Enter Forbidden Library',exact:true}).click();await expect(page.locator('.key-reveal')).toBeVisible();await page.locator('.key-reveal button').click();await expect(page.locator('.inventory')).toContainText('3/3');
+ await page.getByRole('button',{name:/Open the castle gates/}).click();await page.locator('.loose-keys button').nth(0).click();await page.getByRole('button',{name:'Time Key lock',exact:true}).click();await expect(page.getByRole('button',{name:'Time Key lock',exact:true})).toBeEnabled();
+ for(const r of rooms){await page.locator('.loose-keys button').filter({hasText:r.key}).click();await page.getByRole('button',{name:`${r.key} lock`,exact:true}).click();}
+ await page.getByRole('button',{name:'OPEN CHEST'}).click();await expect(page.locator('.card-number')).toContainText(/B3-\d{6}/);const number=await page.locator('.card-number').innerText();
+ const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'SAVE MY CARD'}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/B3-\d{6}\.png$/);await download.saveAs('test-results/reward.png');
+ await page.reload();await expect(page.locator('.card-number')).toHaveText(number);await page.getByRole('button',{name:'NEW ADVENTURE',exact:true}).click();await page.getByRole('button',{name:'KEEP PLAYING'}).click();await expect(page.locator('.card-number')).toHaveText(number);await page.getByRole('button',{name:'NEW ADVENTURE',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'NEW ADVENTURE'}).click();await expect(page.locator('.inventory')).toContainText('0/3');expect(errors).toEqual([]);
+});
+for(const [width,height] of [[1920,1080],[1366,768],[1280,720],[1024,768],[768,1024],[390,844],[844,390]])test(`viewport ${width}x${height} stays inside the screen`,async({page})=>{
+ await page.setViewportSize({width,height});await page.goto('/');
+ const check=async()=>{const issues=await page.evaluate(()=>{const items=[...document.querySelectorAll('button,a')].filter(e=>e.checkVisibility()&&!e.disabled);return items.filter(e=>{const r=e.getBoundingClientRect();return r.left<-.5||r.top<-.5||r.right>innerWidth+.5||r.bottom>innerHeight+.5;}).map(e=>e.textContent);});expect(issues).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight)).toBe(true);};await check();
+ if(height>width){await expect(page.locator('.rotate')).toBeVisible();return;}
+ await page.screenshot({path:`test-results/hall-${width}.png`});for(const r of rooms){await page.getByRole('button',{name:`Enter ${r.short}`,exact:true}).click();await check();await page.getByRole('button',{name:'Map',exact:false}).click();await check();await page.getByRole('button',{name:'Close dialog'}).click();await page.getByRole('button',{name:'BACK TO HALL',exact:false}).click();}
+});
+test('touch tap and pointer drag match locks',async({browser})=>{const context=await browser.newContext({viewport:{width:1024,height:768},hasTouch:true});const page=await context.newPage();await page.goto('/');await page.evaluate(()=>localStorage.setItem('boos-academy-v1',JSON.stringify({version:1,scene:'gates',progress:{library:3,gallery:3,tower:3},inserted:[],mistakes:{},sound:false})));await page.reload();await page.locator('.loose-keys button').nth(0).tap();await page.locator('[data-lock="library"]').tap();await expect(page.locator('[data-lock="library"]')).toBeDisabled();const a=await page.locator('.loose-keys button').nth(1).boundingBox(),b=await page.locator('[data-lock="gallery"]').boundingBox();await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:10});await page.mouse.up();await expect(page.locator('[data-lock="gallery"]')).toBeDisabled();await context.close();});

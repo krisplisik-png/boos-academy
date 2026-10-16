@@ -1,0 +1,8 @@
+import {rooms} from './data.js';
+export const STORAGE='boos-academy-v1';
+export const fresh=()=>({version:1,scene:'hall',progress:{library:0,gallery:0,tower:0},mistakes:{},inserted:[],card:null,sound:true,music:false});
+export const keys=s=>rooms.filter(r=>s.progress[r.id]===3).map(r=>r.id);
+export function answer(s,id,index){const r=rooms.find(r=>r.id===id),step=s.progress[id];if(!r||step>=3)return s; const token=`${id}-${step}`;return index===r.questions[step].answer?{...s,progress:{...s.progress,[id]:step+1}}:{...s,mistakes:{...s.mistakes,[token]:(s.mistakes[token]||0)+1}};}
+export function insert(s,key,lock){if(keys(s).length!==3||key!==lock||!keys(s).includes(key)||s.inserted.includes(key))return s;return {...s,inserted:[...s.inserted,key]};}
+export function award(s,random=Math.random){return s.inserted.length===3?{...s,card:s.card||`B3-${Math.floor(random()*900000+100000)}`,scene:'reward'}:s;}
+export function restore(raw){try{const p=JSON.parse(raw);if(p.version!==1)return fresh();const s={...fresh(),sound:p.sound!==false,music:p.music===true};for(const r of rooms)s.progress[r.id]=Number.isInteger(p.progress?.[r.id])?Math.max(0,Math.min(3,p.progress[r.id])):0;s.mistakes=Object.fromEntries(Object.entries(p.mistakes||{}).filter(([k,v])=>/^(library|gallery|tower)-[0-2]$/.test(k)&&Number.isInteger(v)&&v>=0));s.inserted=keys(s).length===3?[...new Set((p.inserted||[]).filter(k=>keys(s).includes(k)))]:[];s.card=s.inserted.length===3&&/^B3-\d{6}$/.test(p.card)?p.card:null;s.scene=['hall',...rooms.map(r=>r.id)].includes(p.scene)?p.scene:keys(s).length===3&&['gates','chest','reward'].includes(p.scene)?p.scene:'hall';if(['chest','reward'].includes(s.scene)&&s.inserted.length<3)s.scene='gates';return s;}catch{return fresh();}}
