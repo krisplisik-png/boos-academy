@@ -25,7 +25,7 @@ npm run preview
 1. Создайте репозиторий GitHub и загрузите проект в ветку `main` без `node_modules` и `dist`.
 2. В репозитории откройте **Settings → Pages → Source → GitHub Actions**.
 3. Запустите workflow **Deploy to GitHub Pages**, либо отправьте изменения в `main`.
-4. Адрес появится в результате workflow. Публикация не выполнена автоматически из этой локальной папки.
+4. Игра опубликована по адресу https://krisplisik-png.github.io/boos-academy/. Репозиторий: https://github.com/krisplisik-png/boos-academy. Изменения в main автоматически публикуются через workflow.
 
 ## Изменение заданий и графики
 
