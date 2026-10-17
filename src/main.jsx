@@ -15,6 +15,8 @@ function App(){
  const container=useRef(),timer=useRef(),drag=useRef(),lastFocus=useRef();
  const room=rooms.find(r=>r.id===s.scene),count=keys(s).length,step=room?s.progress[room.id]:0,q=room?.questions[step];
  useEffect(()=>{if(s.scene==='gates'&&s.inserted.length===3){timer.current=setTimeout(()=>{set(p=>({...p,scene:'chest'}));audio.effect('win');},2200);return()=>clearTimeout(timer.current);}},[s.scene,s.inserted.length]);
+ useEffect(()=>{if(room&&step===3&&count===3){timer.current=setTimeout(()=>set(p=>({...p,scene:'gates'})),2200);return()=>clearTimeout(timer.current);}},[s.scene,step,count]);
+ useEffect(()=>{if(s.scene==='chest'&&!s.card){timer.current=setTimeout(()=>set(p=>award(p)),1200);return()=>clearTimeout(timer.current);}},[s.scene,s.card]);
  const instruction=room?(q?`${room.intro} ${q.text}`:`${room.praise} You found the ${room.key}!`):s.scene==='hall'?welcome:s.scene==='gates'?'Select a key, then its matching lock. You can also drag the keys.':s.scene==='chest'?"Congratulations! You found all three keys! You're a true Escape Master!":'Save your card to celebrate your adventure!';
  useEffect(()=>{const ro=new ResizeObserver(([e])=>setScale(Math.min(e.contentRect.width/1920,e.contentRect.height/1080)));ro.observe(container.current);return()=>ro.disconnect();},[]);
  useEffect(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(s));}catch{setNotice('Progress cannot be saved in this browser. Keep this tab open.');}audio.settings(s.sound,s.music);},[s]);
