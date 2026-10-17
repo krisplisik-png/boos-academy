@@ -33,7 +33,13 @@
 .scene-hall .speech{margin-top:58px;padding:18px 24px;border:1px solid #d2bc8266;border-radius:12px;background:#0c1a30ed;font-size:17px}
 .scene-hall .gate-link{background:#0b192fea;border-color:#cab37988;bottom:110px;font-size:17px}
 .illustrated footer{background:#091426f5;border-top:1px solid #c8aa6c55;color:#c7c9d0}
-.illustrated .floating-book{width:220px;height:220px;top:680px;right:65px;object-fit:contain}
+.illustrated .floating-book{position:absolute;width:180px;height:150px;object-fit:contain;animation:book-drift 8s ease-in-out infinite;filter:drop-shadow(0 0 12px #ffd67b99)}
+.illustrated .floating-book-0{top:265px;left:510px;transform:rotate(-14deg)}
+.illustrated .floating-book-1{top:300px;left:930px;transform:rotate(12deg);animation-delay:-2s}
+.illustrated .floating-book-2{top:230px;right:470px;transform:rotate(8deg);animation-delay:-4s}
+.illustrated .floating-book-3{top:540px;right:215px;transform:rotate(-18deg);animation-delay:-6s}
+@keyframes book-drift{0%,100%{translate:0 0 rotate(0deg)}50%{translate:26px -22px rotate(8deg)}}
+.scene-library .scene-background,.scene-tower .scene-background,.scene-gallery .scene-background{filter:saturate(1.08) brightness(.78)}
 .illustrated .key-reveal{top:345px}.illustrated .reward-key{width:340px;margin:10px auto}.illustrated .reward-key .key-icon{width:340px;height:340px;filter:none}
 .illustrated .key-reveal h2{font-size:46px}.illustrated .key-reveal p{margin:10px 0 20px}
 .scene-gates .room-heading{top:155px;left:520px;width:880px;padding:14px 20px;background:#08172ae8;border:1px solid #cfb37655;border-radius:12px}
