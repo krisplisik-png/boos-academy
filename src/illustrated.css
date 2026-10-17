@@ -97,3 +97,5 @@
 .scene-tower .answers.tower .answer-bottom,.scene-gallery .answers.gallery .answer-bottom{margin-top:225px;color:#fff;text-shadow:0 2px 3px #130d2b;opacity:.9}
 .gallery-bat{position:absolute;top:185px;right:520px;width:180px;height:145px;object-fit:contain;filter:drop-shadow(0 0 12px #ff7d9c99);animation:bat-flutter 4s ease-in-out infinite}
 @keyframes bat-flutter{50%{transform:translateY(-18px) rotate(-5deg)}to{transform:translateY(0) rotate(4deg)}}
+
+.scene-gallery .answers.gallery .portrait-art{display:block;position:absolute;left:23%;right:23%;top:34px;width:54%;height:185px;object-fit:contain;object-position:center;filter:drop-shadow(0 3px 8px #0008)}
